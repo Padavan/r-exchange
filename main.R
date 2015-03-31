@@ -23,6 +23,18 @@ dat3$fac <- as.factor('three')
 
 datFinal <- rbind.data.frame(dat2, dat3) #final DF for plotting, values separated by factor 
 
+# your nice loop
+datFinalFixed <- datFinal
+
+for (i in 1:length(datFinalFixed$U)) {
+  if (datFinalFixed$U[i] < .003) {
+    datFinalFixed$U[i] <- 0
+  }
+  else {
+    datFinalFixed$U[i] <- datFinalFixed$U[i] - .003
+  }
+}
+
 g <- ggplot(data = datFinal, aes(x = lambda, y = U)) + 
   geom_line(aes(colour = fac)) +
   geom_point(aes(colour = fac)) +
