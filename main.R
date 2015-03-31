@@ -25,6 +25,7 @@ datFinal <- rbind.data.frame(dat2, dat3) #final DF for plotting, values separate
 
 g <- ggplot(data = datFinal, aes(x = lambda, y = U)) + 
   geom_line(aes(colour = fac)) +
+  geom_point(aes(colour = fac)) +
   scale_colour_discrete(name = 'Name your legend', l = 40) + 
   labs(list(x = 'x-axis descr.', y = 'y-axis descr')) +
   theme_bw()
