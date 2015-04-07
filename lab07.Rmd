@@ -1,0 +1,168 @@
+---
+output:
+  pdf_document:
+    fig_caption: no
+    latex_engine: xelatex
+  html_document: default
+mainfont: Arial
+fontsize: 11pt
+---
+
+##Цель работы:
+
+Цель настоящей работы - исследование характеристик полупроводникового полоскового лазера.
+
+##Схема установки (исходные данные)
+
+![alt text](scheme.png)
+
+Блок-схема эксперементальной установки приведена на рис.1. Основной установки является полупроводниковый полосковый гетеролазер 1. Лазер питается постоянным током от блока питания 2. Величина тока лазера устанавливается регулятором в блоке питания 2 и контролируется по показаниям встроенного стрелочного прибора - миллиамперметра. 
+
+Модулированное обтюратором 3 излучение гетеролазера фокусируется с помощью линзы 4 на входную щель решеточного монохроматора 5. При прохождение через монохроматор излучение претерпевает разложение по длинам волн. Свет опередленной волны поступает на фотоприемник 6, представляющий собой германиевый фотодиод. 
+
+
+##Ход работы
+
+Проведя юстировку линзы, а также настроив монохроматор на максимальный сигнал фотоответа, найдем соответствующую длину волны: $\lambda = 663,2 \pm 0,2 nm$ .
+
+Закрывая пучок лазера вычислим уровня шума: $U_\textit{Ш}=0,3 \mu V$.
+
+Теперь исследуем зависимость сигнала фотоответа от тока накачки. Учтем также шум: $$ U_\textit{ИСТ} = \sqrt{ U_\textit{ИЗМ}^2 - U_\textit{Ш}^2 } $$
+
+```{r pander, echo=FALSE}
+options(scipen=999) #remove scientific notation
+dat <- read.csv('dataset1.csv', sep = '\t')
+U_ist <- sqrt(dat$U**2 - 0.0003**2)*1000
+dat$U <- dat$U*1000
+dat$A <- dat$A
+
+df <- data.frame(n = 1:18, dat, U_ist)
+colnames(df) <- c("n","$J, mA$", "$U_\\textit{ИЗМ}$ ,$\\mu V$","$U_\\textit{ИСТ}$,$\\mu V$")
+library(pander)
+panderOptions('table.split.table', 300)
+pander(df, justify = c('right', 'right', 'right','right'),digits=2, split.cells = c(5,10,10,10), caption = "Зависимость сигнала фотоответа от тока накачки")
+```
+
+По полученным данным построим график:
+
+
+```{r, echo=FALSE}
+library(ggplot2)
+
+dat <- read.csv('dataset1.csv', sep = '\t')
+#colnames(dat) <- c("J,mA", "U,mV")
+g <- ggplot(dat, aes(x = A, y = U)) +
+  geom_point()+
+  geom_line() +
+  scale_x_log10(breaks = c(5,10,15,20,25,30,35)) +
+  theme_bw() +
+  labs(list(x = "J,mA", y = 'U,mV')) 
+  
+plot(g, sub="shit works")
+```
+
+Исходя из графика можно сделать вывод, что пороговое значение тока лазерной генерации составляет $J_/textit{ПОР} = 0,17 mV$ 
+
+Исследуем амплитуды сигнала фотоответа от длины волны для случаев спонтанного и стимулированного излучения:
+
+###Спонтанное излучение
+
+Спонтанное излучение исследуем в промежутке до порогового значения тока лазерной генерации $J < J_\textit{ПОР}$. В нашем случае, это $J=10 mA$
+
+```{r pander2, echo=FALSE}
+dat <- read.csv('dataset2.csv', sep = '\t')
+dat$U <- dat$U*1000
+df <- data.frame(n = 1:18, dat)
+colnames(df) <- c("n",'$\\lambda$, nm', "U,nV")
+library(pander)
+panderOptions('table.split.table', 300)
+pander(df, justify = c('right', 'right', 'right'),digits=2,  caption = "Спонтанное излучение")
+```
+
+```{r plot2, fig.cap="Caption", echo=FALSE}
+library(ggplot2)
+dat3 <- read.csv('dataset2.csv', sep = '\t')
+dat3$U <- dat3$U*1000
+#colnames(dat) <- c("J,mA", "U,mV")
+g <- ggplot(data = dat3, aes(x = lambda, y = U)) + 
+  geom_line() +
+  geom_point() +
+  scale_colour_discrete(name = 'Name your legend', l = 20) + 
+  labs(list(x =  expression(list(lambda,nm)), y = 'U,nV')) +
+  theme_bw()
+
+plot(g, sub="Спонтанное излучение")
+```
+
+###Стимулированное излучение
+
+Спонтанное излучение исследуем в промежутке до порогового значения тока лазерной генерации $J > J_\textit{ПОР}$. В нашем случае, это $J=34 mA$
+
+```{r pander3, echo=FALSE}
+dat <- read.csv('dataset3.csv', sep = '\t')
+dat$U <- dat$U*1000
+df <- data.frame(n = 1:18, dat)
+colnames(df) <- c("n",'$\\lambda$, nm', "U,nV")
+library(pander)
+panderOptions('table.split.table', 300)
+pander(df, justify = c('right', 'right', 'right'),digits=2,  caption = "Стимулированное излучение")
+```
+
+```{r plot3, echo=FALSE}
+library(ggplot2)
+
+dat3 <- read.csv('dataset3.csv', sep = '\t')
+dat3$U <- dat3$U*1000
+#colnames(dat) <- c("J,mA", "U,mV")
+g <- ggplot(data = dat3, aes(x = lambda, y = U)) + 
+  geom_line() +
+  geom_point() +
+  scale_colour_discrete(name = 'Name your legend', l = 40) + 
+  labs(list(x =  expression(list(lambda,nm)), y = 'U,nV')) +
+  theme_bw()
+  
+plot(g, sub="Стимулированное излучение")
+```
+
+
+Теперь сравним нормированные интенсивности лазера.
+
+```{r plotdouble, echo=FALSE}
+library(ggplot2)
+
+dat2 <- read.csv('dataset2.csv', sep = '\t')
+dat3 <- read.csv('dataset3.csv', sep = '\t')
+
+dat2$fac <- as.factor('Spontaneous') #change 'two to the name you need for legend
+dat3$fac <- as.factor('Stimulated')
+dat2$U <- dat2$U/0.0246
+dat3$U <- dat3$U/0.48
+datFinal <- rbind.data.frame(dat2, dat3) #final DF for plotting, values separated by factor 
+
+# your nice loop
+datFinalFixed <- datFinal
+
+#for (i in 1:length(datFinalFixed$U)) {
+#  if (datFinalFixed$U[i] < .003) {
+#    datFinalFixed$U[i] <- 0
+#  }
+#  else {
+#    datFinalFixed$U[i] <- datFinalFixed$U[i]**2 - .003**2
+#  }
+#}
+
+g <- ggplot(data = datFinal, aes(x = lambda, y = U)) + 
+  geom_line(aes(colour = fac)) +
+  geom_point(aes(colour = fac)) +
+  scale_colour_discrete(name = "Emission", l = 40) + 
+  labs(list(x = expression(list(lambda,nm)), y = 'I/Imax')) +
+  theme_bw()
+
+plot(g)
+```
+
+Длина волны:
+
+##Вывод:
+
+
